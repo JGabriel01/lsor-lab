@@ -1,0 +1,19 @@
+#!/bin/bash
+set -e
+
+# Configura IP publico simulado (sem rota padrao para a rede interna)
+ip addr add 203.0.113.50/24 dev eth0
+ip link set eth0 up
+
+# Gera par de chaves SSH no boot e publica a chave publica em /shared/keys
+mkdir -p /root/.ssh /shared/keys
+chmod 700 /root/.ssh
+rm -f /root/.ssh/id_ed25519 /root/.ssh/id_ed25519.pub
+ssh-keygen -t ed25519 -N "" -f /root/.ssh/id_ed25519 -C "ext@inet" >/dev/null
+cp /root/.ssh/id_ed25519.pub /shared/keys/ext.pub
+
+cat <<'EOF' > /root/.ssh/config
+Host *
+    StrictHostKeyChecking accept-new
+EOF
+chmod 600 /root/.ssh/config

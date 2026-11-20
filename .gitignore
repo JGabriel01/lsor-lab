@@ -1,0 +1,6 @@
+# Pasta compartilhada temporaria criada pelo Kathara em tempo de execucao
+shared/
+
+# Arquivos temporarios do sistema
+.DS_Store
+Thumbs.db

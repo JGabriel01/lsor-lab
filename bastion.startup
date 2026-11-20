@@ -1,0 +1,47 @@
+#!/bin/bash
+set -e
+
+# Configura IP na DMZ e rota padrao pelo roteador gw
+ip addr add 10.10.1.22/24 dev eth0
+ip link set eth0 up
+ip route add default via 10.10.1.1
+
+# Cria o usuario da dupla (jglh) sem senha de login
+if ! id jglh >/dev/null 2>&1; then
+    useradd -m -s /bin/bash jglh
+fi
+passwd -d jglh >/dev/null 2>&1 || true
+
+# Prepara diretorio .ssh do usuario jglh
+mkdir -p /home/jglh/.ssh
+chmod 700 /home/jglh/.ssh
+touch /home/jglh/.ssh/authorized_keys
+chmod 600 /home/jglh/.ssh/authorized_keys
+chown -R jglh:jglh /home/jglh/.ssh
+
+# Gera chaves de host do OpenSSH no boot (nunca embutidas na imagem)
+rm -f /etc/ssh/ssh_host_*
+ssh-keygen -A >/dev/null
+
+# Garante diretorio de runtime e inicia o servidor OpenSSH
+mkdir -p /run/sshd
+/usr/sbin/sshd
+
+# Aguarda em segundo plano as chaves publicas de admin e ext em /shared/keys
+(
+    for _ in $(seq 1 30); do
+        if [ -f /shared/keys/admin.pub ] || [ -f /shared/keys/ext.pub ]; then
+            cat /shared/keys/*.pub 2>/dev/null | sort -u > /home/jglh/.ssh/authorized_keys
+            chown jglh:jglh /home/jglh/.ssh/authorized_keys
+            chmod 600 /home/jglh/.ssh/authorized_keys
+        fi
+        if [ -f /shared/keys/admin.pub ] && [ -f /shared/keys/ext.pub ]; then
+            sleep 2
+            cat /shared/keys/*.pub 2>/dev/null | sort -u > /home/jglh/.ssh/authorized_keys
+            chown jglh:jglh /home/jglh/.ssh/authorized_keys
+            chmod 600 /home/jglh/.ssh/authorized_keys
+            break
+        fi
+        sleep 1
+    done
+) &
