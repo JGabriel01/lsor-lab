@@ -1,0 +1,6 @@
+# Garante quebra de linha Linux (LF) em scripts e configuracoes, mesmo ao clonar no Windows
+*.sh text eol=lf
+*.startup text eol=lf
+*.conf text eol=lf
+Dockerfile text eol=lf
+*.pcap binary
