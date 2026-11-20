@@ -77,7 +77,7 @@ As imagens customizadas estão publicadas como repositórios públicos na tag `1
 
 ### 1. Clonar e subir o laboratório (sem `docker build`)
 ```bash
-git clone <URL-DO-REPOSITORIO>
+git clone https://github.com/JGabriel01/lsor-lab.git
 cd lsor-lab
 kathara lstart
 ```
@@ -128,3 +128,10 @@ kathara lclean
 * `t10_nginx_access_log.txt` — log exclusivo do NGINX mostrando `203.0.113.50` preservado pelo DNAT.
 * `http_claro.pcap` — captura `tcpdump` no `gw` (`eth0`, porta 80) exibindo tráfego HTTP legível em texto claro.
 * `ssh_cifrado.pcap` — captura `tcpdump` no `gw` (`eth0`, porta 2222) exibindo tráfego SSH criptografado.
+
+Para inspecionar rapidamente as capturas no terminal (ou abrir no Wireshark):
+```bash
+# Comparar texto claro (HTTP) vs. dados cifrados (SSH)
+tcpdump -A -r evidencias/http_claro.pcap | head -n 40
+tcpdump -A -r evidencias/ssh_cifrado.pcap | head -n 40
+```
